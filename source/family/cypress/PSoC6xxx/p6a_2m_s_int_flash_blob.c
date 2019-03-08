@@ -1,0 +1,100 @@
+/*******************************************************************************
+* @file    p6_sb_flash_blob.c
+* @brief   Flash algorithm for the PSoC64 2M target MCU
+*
+********************************************************************************
+* Copyright (2019) Cypress Semiconductor Corporation
+* or a subsidiary of Cypress Semiconductor Corporation.
+*
+* Licensed under the Apache License, Version 2.0 (the "License"); you may
+* not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+* WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*****************************************************************************/
+
+#include "flash_blob.h"
+
+// Main Flash algo
+
+static const uint32_t CY8C64xA_flash_prog_blob[] = {
+    0xE00ABE00u, 0x062D780Du, 0x24084068u, 0xD3000040u, 0x1E644058u, 0x1C49D1FAu, 0x2A001E52u, 0x4770D1F2u,
+    0x47702000u, 0x47702000u, 0xf000b510u, 0xbd10fa30u, 0xf000b510u, 0xbd10f9fdu, 0x4611b510u, 0xfa46f000u,
+    0xb510bd10u, 0xfa66f000u, 0xb510bd10u, 0xfa6ff000u, 0x0000bd10u, 0x47706001u, 0x60086800u, 0x4a114770u,
+    0x43502100u, 0x1c49e000u, 0xd8fc4288u, 0xb5304770u, 0x480d4603u, 0xe00f4c0du, 0x0212781au, 0x22004050u,
+    0x04051c5bu, 0x0040d502u, 0xe0004060u, 0x1c520040u, 0xb280b2d2u, 0xd3f42a08u, 0x1e49460au, 0x2a00b289u,
+    0xbd30d1eau, 0x00000d05u, 0x0000ffffu, 0x00001021u, 0x4669b508u, 0xf7ff482bu, 0x9800ffcfu, 0x0f000500u,
+    0x2000d001u, 0x2001bd08u, 0xb530bd08u, 0xb08b4c26u, 0x7820444cu, 0xd13c2800u, 0xffeaf7ffu, 0x40682501u,
+    0xaa097220u, 0xa807a908u, 0x91019202u, 0xab069000u, 0xa904aa05u, 0xf000a803u, 0x2800f8d8u, 0x466bd129u,
+    0x70627b1au, 0x70a17c19u, 0x70e07d18u, 0x71237e1bu, 0x7f1b466bu, 0xab087163u, 0x71a3781bu, 0x791bab08u,
+    0x23ff71e3u, 0x2a017263u, 0x2900d112u, 0x2902d004u, 0x2905d006u, 0xe00bd008u, 0xd10928e2u, 0xe0062000u,
+    0xd10528e4u, 0xe0022002u, 0xd10128e7u, 0x72602005u, 0x48057025u, 0x4448b00bu, 0x4803bd30u, 0x78004448u,
+    0x00004770u, 0x40200000u, 0xfffffff4u, 0x460db5feu, 0x014049a5u, 0x301c1840u, 0x46172400u, 0x90012601u,
+    0x98014669u, 0xff68f7ffu, 0x0fc19800u, 0x43084628u, 0x43884029u, 0xd1064070u, 0xd80442bcu, 0xf7ff2001u,
+    0x1c64ff5eu, 0x4070e7ecu, 0xb5f8bdfeu, 0x4996460du, 0x01402400u, 0x46691846u, 0xf7ff4630u, 0x9800ff4du,
+    0xd1060fc0u, 0xd80442acu, 0xf7ff2001u, 0x1c64ff48u, 0x2101e7f1u, 0xbdf84048u, 0x4615b5f8u, 0x4607460eu,
+    0x46292400u, 0xf7ff4638u, 0x6828ff37u, 0x280a0f00u, 0x2000d003u, 0xd0022800u, 0x2001e008u, 0x42b4e7fau,
+    0x2001d804u, 0xff2bf7ffu, 0xe7ea1c64u, 0x40482101u, 0xb5f3bdf8u, 0x4607b081u, 0xff9ff7ffu, 0xd0032800u,
+    0xff53f7ffu, 0xe0037a00u, 0xff42f7ffu, 0x40482101u, 0xd0032800u, 0xd0042801u, 0xbdfe2001u, 0x4c722500u,
+    0x4c71e002u, 0x34202501u, 0x00c9217du, 0xf7ff4628u, 0x2800ffacu, 0x07f8d1f1u, 0x1c7617c6u, 0x4f6bd001u,
+    0x4620447fu, 0x4639300cu, 0xf7ff9000u, 0x4628fef3u, 0x21013010u, 0x48664081u, 0xfeecf7ffu, 0x21014620u,
+    0xf7ff3008u, 0x4a63fee7u, 0x46282100u, 0xff6ef7ffu, 0xd1d22800u, 0x31f521ffu, 0x2e009a02u, 0x4638d001u,
+    0x9800e000u, 0xff98f7ffu, 0xb5febdfeu, 0x4607460eu, 0x4615461cu, 0x2001a901u, 0xffabf7ffu, 0xd11e2800u,
+    0x0a009801u, 0x98017038u, 0x98017030u, 0x0c009908u, 0x20ff7008u, 0x30024669u, 0xff9bf7ffu, 0xd10e2800u,
+    0x0a099900u, 0x99007029u, 0x99007021u, 0x0f0a0309u, 0x700a9909u, 0x02099900u, 0x990a0f0au, 0xbdfe700au,
+    0x4c45b538u, 0x46214841u, 0x38a84478u, 0xfea2f7ffu, 0x46204669u, 0xff7df7ffu, 0xb5f8bd38u, 0x4d3f4c3bu,
+    0x4606447cu, 0x46293cc0u, 0xf7ff4620u, 0x4631fe93u, 0xf7ff1d20u, 0x4669fe8fu, 0xf7ff4628u, 0xbdf8ff6au,
+    0x4c32b5f8u, 0x447c4d36u, 0x3ce64606u, 0x46204629u, 0xfe80f7ffu, 0x1d204631u, 0xfe7cf7ffu, 0x46284669u,
+    0xff57f7ffu, 0xb5f8bdf8u, 0x46064c2eu, 0x4d2c447cu, 0x46294620u, 0xfe6ef7ffu, 0x1d204631u, 0xfe6af7ffu,
+    0x46284669u, 0xff45f7ffu, 0xb5f8bdf8u, 0x460f4c25u, 0x447c4606u, 0x3c264d24u, 0x46204629u, 0xfe5af7ffu,
+    0x310721ffu, 0xf7ff1d20u, 0x4620fe55u, 0x30084631u, 0xfe50f7ffu, 0x46394620u, 0xf7ff300cu, 0x4669fe4bu,
+    0xf7ff4628u, 0xbdf8ff26u, 0x4c16b5f8u, 0x4606460fu, 0x4d16447cu, 0x46293c64u, 0xf7ff4620u, 0x21fffe3bu,
+    0x1d203107u, 0xfe36f7ffu, 0x46314620u, 0xf7ff3008u, 0x4620fe31u, 0x300c4639u, 0xfe2cf7ffu, 0x46284669u,
+    0xff07f7ffu, 0x0000bdf8u, 0x40220000u, 0x00000350u, 0x40221008u, 0x00003a98u, 0x0a000100u, 0x1c000100u,
+    0x14000100u, 0x00000244u, 0x06000100u, 0x05000100u, 0xf7ffb510u, 0xbd10ff72u, 0x4d44b53eu, 0xfe45f7ffu,
+    0x28007a00u, 0x4669d121u, 0xf7ff4841u, 0x4941fe05u, 0x42889800u, 0xa901d119u, 0xf7ff483fu, 0x483cfdfdu,
+    0x31fd21ffu, 0xf7ff1f00u, 0x9901fe02u, 0x42810c09u, 0x4837d10bu, 0x300ca902u, 0xfdeef7ffu, 0x07289c02u,
+    0x18204936u, 0xd8004288u, 0x46281e65u, 0xb5f8bd3eu, 0xf7ff2500u, 0x2401ffd1u, 0x46060724u, 0xe01112a7u,
+    0x1c401b30u, 0x462042b8u, 0xf7ffd305u, 0x0005ff49u, 0x19e4d10au, 0xf7ffe006u, 0x0005ffbbu, 0x34ffd104u,
+    0x340234ffu, 0xd9eb42b4u, 0xbdf84628u, 0xf7ffb510u, 0xbd10ff5cu, 0x4605b570u, 0x2000460cu, 0x4628e008u,
+    0xff1bf7ffu, 0xd1052800u, 0x1e6435ffu, 0x350235ffu, 0xd1f42c00u, 0xb510bd70u, 0x48194604u, 0x02492101u,
+    0xf0004478u, 0x4916f84du, 0x39084479u, 0xf7ff4620u, 0xbd10ff5bu, 0x2300b570u, 0xe0044604u, 0x5ce65cd5u,
+    0xd10242b5u, 0x428b1c5bu, 0x18e0d3f8u, 0xb530bd70u, 0x46232400u, 0x5cc5e005u, 0xd0014295u, 0xe0022401u,
+    0x428b1c5bu, 0x4620d3f7u, 0x0000bd30u, 0x101fffffu, 0x101dfe04u, 0x01211221u, 0x101dfffcu, 0x001fffffu,
+    0x000000c4u, 0xc004e001u, 0x29041f09u, 0x078bd2fbu, 0x8002d501u, 0x07c91c80u, 0x7002d000u, 0x29004770u,
+    0x07c3d00bu, 0x7002d002u, 0x1e491c40u, 0xd3042902u, 0xd5020783u, 0x1c808002u, 0xe7e31e89u, 0xe7ee2200u,
+    0xe7df2200u, 0xffffff00u, 0xffffffffu, 0x0000ffffu, 0x00000000
+};
+
+static const program_target_t CY8C64xA_flash_prog =
+    // Main Flash
+    {
+        .init =         PSOC6_SRAM_START_ADDR + 0x00000021u, // Init
+        .uninit =       PSOC6_SRAM_START_ADDR + 0x00000025u, // UnInit
+        .erase_chip =   PSOC6_SRAM_START_ADDR + 0x00000029u, // EraseChip
+        .erase_sector = PSOC6_SRAM_START_ADDR + 0x00000031u, // EraseSector
+        .program_page = PSOC6_SRAM_START_ADDR + 0x00000039u, // ProgramPage
+        .verify =       PSOC6_SRAM_START_ADDR + 0x00000043u, // Verify
+        // BKPT : start of blob + 1
+        // RSB  : blob start + header + rw data offset
+        // RSP  : stack pointer
+        .sys_call_s =
+            {
+                PSOC6_SRAM_START_ADDR + 0x00000001u,
+                PSOC6_SRAM_START_ADDR + 0x000005b0u,
+                PSOC6_SRAM_START_ADDR + 0x00000e00u
+            },
+        .program_buffer = PSOC6_SRAM_START_ADDR + 0x00000e00u,          // mem buffer location
+        .algo_start = PSOC6_SRAM_START_ADDR,                           // location to write prog_blob in target RAM
+        .algo_size = sizeof(CY8C64xA_flash_prog_blob),    // prog_blob size
+        .algo_blob = CY8C64xA_flash_prog_blob,            // address of prog_blob
+        .program_buffer_size = 512u,                  // ram_to_flash_bytes_to_be_written
+        .algo_flags = (kAlgoVerifyReturnsAddress | kAlgoSingleInitType)
+    };
+    

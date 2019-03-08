@@ -1643,7 +1643,7 @@ uint32_t DAP_ProcessCommand(const uint8_t *request, uint8_t *response) {
 
   if ((*request >= ID_DAP_VendorExFirst) && (*request <= ID_DAP_VendorExLast)) {
     return DAP_ProcessVendorCommandEx(request, response);
-  }  
+  }
 
   *response++ = *request;
 

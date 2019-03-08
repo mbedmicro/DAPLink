@@ -1,0 +1,14 @@
+common:
+    macros:
+        - TARGET_MCU_PSOC6
+    includes:
+        - source/family/cypress/PSoC6xxx
+    sources:
+        board:
+            - source/board/cy8ckit.c
+        target:
+            - source/family/cypress/target.c
+            - source/family/cypress/target_reset.c
+            - source/family/cypress/PSoC6xxx/PSOC6xxx.c
+            
+
