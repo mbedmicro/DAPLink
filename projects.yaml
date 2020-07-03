@@ -57,6 +57,10 @@ module:
         - records/rtos/rtos-cm3.yaml
         - records/hic_hal/lpc4322.yaml
         - records/usb/usb-bulk.yaml
+    hic_psoc5lp: &module_hic_psoc5lp
+        - records/rtos/rtos-cm3.yaml
+        - records/hic_hal/psoc5lp.yaml
+        - records/usb/usb-bulk.yaml
     hic_sam3u2c: &module_hic_sam3u2c
         - records/rtos/rtos-cm3.yaml
         - records/hic_hal/sam3u2c.yaml
@@ -626,6 +630,10 @@ projects:
         - *module_if
         - *module_hic_lpc11u35
         - records/board/wio_emw3166.yaml
+    psoc5lp_cy8ckit_if:
+        - *module_if
+        - *module_hic_psoc5lp
+        - records/board/cy8ckit.yaml
     m48ssidae_bl:
         - *module_bl
         - records/hic_hal/m48ssidae.yaml
