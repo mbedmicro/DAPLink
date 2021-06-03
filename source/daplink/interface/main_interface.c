@@ -225,7 +225,8 @@ void main_task(void * arg)
     // LED
     gpio_led_state_t hid_led_value = HID_LED_DEF;
     gpio_led_state_t cdc_led_value = CDC_LED_DEF;
-    gpio_led_state_t msc_led_value = MSC_LED_DEF;
+    gpio_led_state_t msc_led_value = MSC_LED_DEF;	
+	
     // USB
     uint32_t usb_state_count = USB_BUSY_TIME;
     uint32_t usb_no_config_count = USB_CONFIGURE_TIMEOUT;
@@ -242,13 +243,16 @@ void main_task(void * arg)
     // Get a reference to this task
     main_task_id = osThreadGetId();
 #endif
-    // leds
+    
+	// leds
     gpio_init();
-    // Turn to LED default settings
+	
+	// Turn to LED default settings	
     gpio_set_hid_led(hid_led_value);
-    gpio_set_cdc_led(cdc_led_value);
+   	gpio_set_cdc_led(cdc_led_value);
     gpio_set_msc_led(msc_led_value);
-    // Initialize the DAP
+	
+	// Initialize the DAP
     DAP_Setup();
 
     // make sure we have a valid board info structure.
@@ -506,15 +510,14 @@ void main_task(void * arg)
 
 int main(void)
 {
-    // Explicitly set the vector table since the bootloader might not set
-    // it to what we expect.
+
 #if DAPLINK_ROM_BL_SIZE > 0
     SCB->VTOR = SCB_VTOR_TBLOFF_Msk & DAPLINK_ROM_IF_START;
 #endif
     // initialize vendor sdk
     sdk_init();
-
-    // Initialize CMSIS-RTOS
+	
+   // Initialize CMSIS-RTOS
     osKernelInitialize();
 
     // Create application main thread

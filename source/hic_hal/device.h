@@ -40,6 +40,10 @@
 #include "sam3u2c.h"
 #elif defined (INTERFACE_STM32F103XB)
 #include "stm32f103xb.h"
+#elif defined (INTERFACE_STM32F373XC)
+#include "stm32f373xc.h"
+#elif defined (INTERFACE_STM32WB55XX)
+#include "stm32wb55xx.h"
 #elif defined (INTERFACE_M48SSIDAE)
 #include "M480.h"
 #else
