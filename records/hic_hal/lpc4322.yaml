@@ -10,10 +10,16 @@ common:
         - DAPLINK_HIC_ID=0x97969905  # DAPLINK_HIC_ID_LPC4322
         - OS_CLOCK=96000000
     includes:
+        - source/cmsis-driver
         - source/hic_hal/nxp/lpc4322
+        - source/hic_hal/nxp/lpc4322/RTE_Driver
+        - source/hic_hal/nxp/lpc4322/RTE_Driver/Config
     sources:
         hic_hal:
             - source/hic_hal/nxp/lpc4322
+            - source/hic_hal/nxp/lpc4322/RTE_Driver/SCU_LPC43xx.c
+            - source/hic_hal/nxp/lpc4322/RTE_Driver/USART_LPC43xx.c
+            - source/hic_hal/nxp/lpc4322/RTE_Driver/GPDMA_LPC43xx.c
 
 tool_specific:
     uvision:
@@ -31,7 +37,11 @@ tool_specific:
         sources:
             hic_hal:
                 - source/hic_hal/nxp/lpc4322/armcc
-    gcc_arm:
+    make_gcc_arm:
+        linker_file:
+            - source/hic_hal/nxp/lpc4322/gcc/lpc4322.ld
+        includes:
+            - source/hic_hal/nxp/lpc4322/gcc
         sources:
             hic_hal:
                 - source/hic_hal/nxp/lpc4322/gcc
