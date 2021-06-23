@@ -66,6 +66,8 @@ typedef enum _magic_file {
     kOverflowOffConfigFile,     //!< Disable UART overflow reporting.
     kMSDOnConfigFile,           //!< Enable USB MSC. Uh....
     kMSDOffConfigFile,          //!< Disable USB MSC.
+    kImageCheckOnConfigFile,    //!< Enable Incompatible target image detection.
+    kImageCheckOffConfigFile,   //!< Disable Incompatible target image detection.
     kPageEraseActionFile,       //!< Enable page programming and sector erase for drag and drop.
     kChipEraseActionFile,       //!< Enable page programming and chip erase for drag and drop.
 } magic_file_t;
@@ -110,11 +112,13 @@ static const magic_file_info_t s_magic_file_info[] = {
         { "OVFL_OFFCFG", kOverflowOffConfigFile     },
         { "MSD_ON  CFG", kMSDOnConfigFile           },
         { "MSD_OFF CFG", kMSDOffConfigFile          },
+        { "COMP_ON CFG", kImageCheckOnConfigFile    },
+        { "COMP_OFFCFG", kImageCheckOffConfigFile   },
         { "PAGE_ON ACT", kPageEraseActionFile       },
         { "PAGE_OFFACT", kChipEraseActionFile       },
     };
 
-static uint8_t file_buffer[VFS_SECTOR_SIZE];
+static uint8_t file_buffer[VFS_SECTOR_SIZE+100];
 static char assert_buf[64 + 1];
 static uint16_t assert_line;
 static assert_source_t assert_source;
@@ -133,6 +137,8 @@ static uint32_t update_details_txt_file(uint8_t *data, uint32_t datasize);
 static void erase_target(void);
 
 static uint32_t expand_info(uint8_t *buf, uint32_t bufsize);
+
+__WEAK void vfs_user_build_filesystem_hook(){}
 
 void vfs_user_build_filesystem()
 {
@@ -173,6 +179,8 @@ void vfs_user_build_filesystem()
         file_size = get_file_size(read_file_need_bl_txt);
         vfs_create_file("NEED_BL TXT", read_file_need_bl_txt, 0, file_size);
     }
+    
+    vfs_user_build_filesystem_hook();
 }
 
 // Default file change hook.
@@ -268,6 +276,12 @@ void vfs_user_file_change_handler(const vfs_filename_t filename, vfs_file_change
                     case kMSDOffConfigFile:
                         config_ram_set_disable_msd(true);
                         break;
+                    case kImageCheckOnConfigFile:
+                        config_set_detect_incompatible_target(true);
+                        break;
+                    case kImageCheckOffConfigFile:
+                        config_set_detect_incompatible_target(false);
+                        break;
                     case kPageEraseActionFile:
                         config_ram_set_page_erase(true);
                         break;
@@ -334,12 +348,22 @@ static uint32_t read_file_mbed_htm(uint32_t sector_offset, uint8_t *data, uint32
 // File callback to be used with vfs_add_file to return file contents
 static uint32_t read_file_details_txt(uint32_t sector_offset, uint8_t *data, uint32_t num_sectors)
 {
+    uint32_t size = 0;
 
-    if (sector_offset != 0) {
+    if (sector_offset > 1) {
         return 0;
     }
+    
+    size = update_details_txt_file(file_buffer, VFS_SECTOR_SIZE+100);
+    
+    if (size - VFS_SECTOR_SIZE * sector_offset > VFS_SECTOR_SIZE) {
+        memcpy(data, file_buffer + sector_offset * VFS_SECTOR_SIZE, VFS_SECTOR_SIZE);
+    }
+    else {
+        memcpy(data, file_buffer + sector_offset * VFS_SECTOR_SIZE, size - VFS_SECTOR_SIZE * sector_offset);
+    }
 
-    return update_details_txt_file(data, VFS_SECTOR_SIZE);
+    return size;
 }
 
 // Text representation of each error type, starting from the rightmost bit
@@ -491,6 +515,9 @@ static uint32_t update_details_txt_file(uint8_t *data, uint32_t datasize)
     pos += util_write_string(buf + pos, "\r\n");
     pos += util_write_string(buf + pos, "Overflow detection: ");
     pos += util_write_string(buf + pos, config_get_overflow_detect() ? "1" : "0");
+    pos += util_write_string(buf + pos, "\r\n");
+    pos += util_write_string(buf + pos, "Incompatible image detection: ");
+    pos += util_write_string(buf + pos, config_get_detect_incompatible_target() ? "1" : "0");
     pos += util_write_string(buf + pos, "\r\n");
     pos += util_write_string(buf + pos, "Page erasing: ");
     pos += util_write_string(buf + pos, config_ram_get_page_erase() ? "1" : "0");
