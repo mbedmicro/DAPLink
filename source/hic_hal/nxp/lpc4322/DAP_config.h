@@ -83,17 +83,19 @@ typedef unsigned int    BOOL;
 /// Maximum Package Size for Command and Response data.
 /// This configuration settings is used to optimized the communication performance with the
 /// debugger and depends on the USB peripheral. Change setting to 1024 for High-Speed USB.
-#define DAP_PACKET_SIZE       64              ///< USB: 64 = Full-Speed, 1024 = High-Speed.
+#define DAP_PACKET_SIZE       512              ///< USB: 64 = Full-Speed, 1024 = High-Speed.
 
 /// Maximum Package Buffers for Command and Response data.
 /// This configuration settings is used to optimized the communication performance with the
 /// debugger and depends on the USB peripheral. For devices with limited RAM or USB buffer the
 /// setting can be reduced (valid range is 1 .. 255). Change setting to 4 for High-Speed USB.
-#define DAP_PACKET_COUNT      1              ///< Buffers: 64 = Full-Speed, 4 = High-Speed.
+#define DAP_PACKET_COUNT      8              ///< Buffers: 64 = Full-Speed, 4 = High-Speed.
 
 /// Indicate that UART Serial Wire Output (SWO) trace is available.
 /// This information is returned by the command \ref DAP_Info as part of <b>Capabilities</b>.
+#if !defined(SWO_UART)
 #define SWO_UART                0               ///< SWO UART:  1 = available, 0 = not available
+#endif
 
 /// Maximum SWO UART Baudrate
 #define SWO_UART_MAX_BAUDRATE   10000000U       ///< SWO UART Maximum Baudrate in Hz
@@ -106,7 +108,9 @@ typedef unsigned int    BOOL;
 #define SWO_BUFFER_SIZE         4096U           ///< SWO Trace Buffer Size in bytes (must be 2^n)
 
 /// SWO Streaming Trace.
+#if !defined(SWO_STREAM)
 #define SWO_STREAM              0               ///< SWO Streaming Trace: 1 = available, 0 = not available.
+#endif
 
 /// Clock frequency of the Test Domain Timer. Timer value is returned with \ref TIMESTAMP_GET.
 #define TIMESTAMP_CLOCK         1000000U      ///< Timestamp clock in Hz (0 = timestamps not supported).
@@ -151,6 +155,11 @@ extern BOOL gpio_reset_pin_is_input;
 #define PIN_SWDIO_TXE_IN_BIT  8
 #define PIN_SWDIO_TXE         (1<<PIN_SWDIO_TXE_IN_BIT)
 
+// SWO Pin                    P1_14:  GPIO1[7]
+#define PORT_SWO              1
+#define PIN_SWO_IN_BIT        7
+#define PIN_SWO               (1<<PIN_SWO_IN_BIT)
+
 // nRESET Pin                 P2_5:  GPIO5[5]
 #define PORT_nRESET           5
 #define PIN_nRESET_IN_BIT     5
@@ -161,15 +170,27 @@ extern BOOL gpio_reset_pin_is_input;
 #define PIN_RESET_TXE_IN_BIT  6
 #define PIN_RESET_TXE         (1<<PIN_RESET_TXE_IN_BIT)
 
-// ISP Control Pin          P2_11:  GPIO1[11]
-#define ISPCTRL_PORT        1
-#define ISPCTRL_BIT         11
+// ISP Control Pin            P2_11:  GPIO1[11]
+#define PORT_ISPCTRL          1
+#define PIN_ISPCTRL_IN_BIT    11
+#define PIN_ISPCTRL           (1<<PIN_ISPCTRL_IN_BIT)
+
+// Connected LED              P1_1: GPIO0[8]
+#define PORT_LED_CONNECTED    0
+#define PIN_LED_CONNECTED_IN_BIT   8
+#define PIN_LED_CONNECTED     (1<<PIN_LED_CONNECTED_IN_BIT)
+
+// Power Enable               P3_1: GPIO5[8]
+#define PORT_POWER_EN         5
+#define PIN_POWER_EN_BIT      8
+#define PIN_POWER_EN          (1<<PIN_POWER_EN_BIT)
 
 #define X_SET(str)     LPC_GPIO_PORT->SET[PORT_##str] = PIN_##str
 #define X_CLR(str)     LPC_GPIO_PORT->CLR[PORT_##str] = PIN_##str
 #define X_DIR_OUT(str) LPC_GPIO_PORT->DIR[PORT_##str] |= (PIN_##str)
 #define X_DIR_IN(str)  LPC_GPIO_PORT->DIR[PORT_##str] &= ~(PIN_##str)
 #define X_BYTE(str)    LPC_GPIO_PORT->B[(PORT_##str << 5) + PIN_##str##_IN_BIT]
+#define X_WORD(str)    LPC_GPIO_PORT->W[(PORT_##str << 5) + PIN_##str##_IN_BIT]
 
 
 //**************************************************************************************************
@@ -454,6 +475,11 @@ It is recommended to provide the following LEDs for status indication:
 */
 __STATIC_INLINE void LED_CONNECTED_OUT(uint32_t bit)
 {
+    if (bit) {
+        X_SET(LED_CONNECTED);
+    } else {
+        X_CLR(LED_CONNECTED);
+    }
 }
 
 /** Debug Unit: Set status Target Running LED.
